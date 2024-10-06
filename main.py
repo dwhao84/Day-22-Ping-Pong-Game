@@ -8,7 +8,6 @@
 7. Detect when paddle misses
 6. Keep score
 """
-import time
 
 """
 paddle = 短槳
@@ -19,10 +18,11 @@ paddle:
     y_pos = 0
 can move the paddle by using 20px each of time.
 """
-
+import time
 from turtle import Screen
 from paddle import Paddle
 from ball import Ball
+from scoreboard import Scoreboard
 
 screen = Screen()
 screen.bgcolor("black")
@@ -34,8 +34,11 @@ screen.tracer(0) # Turn off the animation in turtle.
 right_paddle = Paddle((350, 0))
 left_paddle = Paddle((-350, 0))
 
-# 建立ball
+# 建立Ball
 ball = Ball()
+# 建立Scoreboard
+scoreboard = Scoreboard()
+
 
 screen.listen() # 監聽螢幕
 screen.onkey(right_paddle.go_up, "Up")
@@ -45,11 +48,31 @@ screen.onkey(left_paddle.go_down, "s")
 
 game_is_on = True
 while game_is_on:
-    time.sleep(0.1)
+    time.sleep(ball.move_speed)
     screen.update() # Refresh the state for screen.
     ball.move()
     
+    # Detect collision with wall
     if ball.ycor() > 280 or ball.ycor() < -280:
-        ball.bounce() # Call bounce method.
+        ball.bounce_y() # Call bounce method.
+        
+    
+    # Detect collision with paddle(incl. right and left)
+    if ball.distance(right_paddle) < 50 and ball.xcor() > 320 or ball.distance(left_paddle) < 50 and ball.xcor() < -320:
+        print("Made connect")
+        ball.bounce_x()
+    
+    # Detect Right paddle is missed
+    if ball.xcor() > 380:
+        print("Com got 1 point.")
+        ball.reposition()
+        scoreboard.right_side_got_score()
+    
+    # Detect Left paddle is missed
+    if ball.xcor() < -380:
+        print("You got 1 point")
+        ball.reposition()
+        scoreboard.left_side_got_score()
+    
 screen.exitonclick()
 
